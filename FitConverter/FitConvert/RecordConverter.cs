@@ -23,7 +23,7 @@ namespace FitConverter.FitConvert
                             smfGeneralInformation.TimeInHRZone3) / 100;
 
             var altitude = smfGeneralInformation.MaximumAltitude * 10 - smfGeneralInformation.AltitudeDifferencesUphill;
-
+            
             byte hr1;
             byte hr2;
             byte hr3;

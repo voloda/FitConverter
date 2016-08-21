@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Dynastream.Fit;
@@ -10,7 +11,7 @@ namespace FitConverter
         void ProcessSection(T source, IFitEncoderAdapter encoder);
     }
 
-    public interface IFitEncoderAdapter
+    public interface IFitEncoderAdapter : IDisposable
     {
         void Write(Mesg messge);
     }
@@ -28,6 +29,10 @@ namespace FitConverter
         {
             _fitEncode.Write(mesg);
         }
-        
+
+        public void Dispose()
+        {
+            _fitEncode.Close();
+        }
     }
 }
