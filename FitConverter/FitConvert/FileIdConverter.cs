@@ -18,7 +18,7 @@ namespace FitConverter.FitConvert
             fileIdMesg.SetSerialNumber((uint?) source.GeneralInformation.Guid.GetHashCode());
             fileIdMesg.SetTimeCreated(new DateTime(_dateTimeService.Now));
             fileIdMesg.SetManufacturer(Manufacturer.Sigmasport);
-            fileIdMesg.SetProduct(901);
+            fileIdMesg.SetProduct(1001);
             fileIdMesg.SetNumber(0);
             fileIdMesg.SetType(File.Activity); // See the 'FIT FIle Types Description' document for more information about this file type.
             encoder.Write(fileIdMesg); // Write the 'File ID Message'

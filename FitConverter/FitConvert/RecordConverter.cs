@@ -8,10 +8,6 @@ namespace FitConverter.FitConvert
 {
     public class RecordConverter : IConverter<SmfEntry>
     {
-        public RecordConverter()
-        {
-        }
-
         public void ProcessSection(SmfEntry source, IFitEncoderAdapter encoder)
         {
             var smfGeneralInformation = source.GeneralInformation;
@@ -23,10 +19,10 @@ namespace FitConverter.FitConvert
 
             var startDate = smfGeneralInformation.StartDate;
 
-            var totalTime = smfGeneralInformation.TimeInHRZone1 + smfGeneralInformation.TimeInHRZone2 +
-                            smfGeneralInformation.TimeInHRZone3;
+            var totalTime = (smfGeneralInformation.TimeInHRZone1 + smfGeneralInformation.TimeInHRZone2 +
+                            smfGeneralInformation.TimeInHRZone3) / 100;
 
-            var altitude = smfGeneralInformation.MaximumAltitude - smfGeneralInformation.AltitudeDifferencesUphill;
+            var altitude = smfGeneralInformation.MaximumAltitude * 10 - smfGeneralInformation.AltitudeDifferencesUphill;
 
             byte hr1;
             byte hr2;
@@ -37,11 +33,12 @@ namespace FitConverter.FitConvert
             // up to 3 messages based on needs
 
             var averageCadence = smfGeneralInformation.AverageCadence;
+            var totalDistance = smfGeneralInformation.Distance;
+            var distance = 0;
 
             if (HasTimeInHRZone1(smfGeneralInformation))
             {
-                var timeInZone = smfGeneralInformation.TimeInHRZone1;
-                var distance = smfGeneralInformation.Distance * timeInZone / totalTime;
+                var timeInZone = smfGeneralInformation.TimeInHRZone1 / 100;
 
                 startDate = startDate.AddSeconds(.5);
 
@@ -50,15 +47,15 @@ namespace FitConverter.FitConvert
                 startDate = startDate.AddSeconds(timeInZone);
                 altitude += smfGeneralInformation.AltitudeDifferencesUphill * timeInZone /
                             totalTime;
+                distance += totalDistance * timeInZone / totalTime;
 
                 WriteEntry(encoder, startDate, averageCadence, hr1, altitude, distance);
             }
 
             if (HasTimeInHRZone2(smfGeneralInformation))
             {
-                var timeInZone = smfGeneralInformation.TimeInHRZone2;
-                var distance = smfGeneralInformation.Distance * timeInZone / totalTime;
-
+                var timeInZone = smfGeneralInformation.TimeInHRZone2 / 100;
+                
                 startDate = startDate.AddSeconds(.5);
 
                 WriteEntry(encoder, startDate, averageCadence, hr2, altitude, distance);
@@ -66,37 +63,43 @@ namespace FitConverter.FitConvert
                 startDate = startDate.AddSeconds(timeInZone);
                 altitude += smfGeneralInformation.AltitudeDifferencesUphill * timeInZone /
                             totalTime;
+                distance += totalDistance * timeInZone / totalTime;
 
                 WriteEntry(encoder, startDate, averageCadence, hr2, altitude, distance);
             }
 
             if (HasTimeInHRZone3(smfGeneralInformation))
-            {                
-                var timeInZone = smfGeneralInformation.TimeInHRZone3;
-                var distance = smfGeneralInformation.Distance * timeInZone / totalTime;
-
+            {
+                var timeInZone = smfGeneralInformation.TimeInHRZone3 / 100;
+                
                 startDate = startDate.AddSeconds(.5);
 
                 WriteEntry(encoder, startDate, averageCadence, hr3, altitude, distance);
 
-                startDate = startDate.AddSeconds(timeInZone);                
+                startDate = startDate.AddSeconds(timeInZone);
                 altitude += smfGeneralInformation.AltitudeDifferencesUphill * timeInZone /
                             totalTime;
+                distance += totalDistance * timeInZone / totalTime;
 
                 WriteEntry(encoder, startDate, averageCadence, hr3, altitude, distance);
             }
-            
+
         }
 
-        private static void WriteEntry(IFitEncoderAdapter encoder, DateTime startDate, byte averageCadence, byte hr3,
+        private static void WriteEntry(IFitEncoderAdapter encoder, DateTime startDate, byte averageCadence, byte hr,
             int altitude, int distance)
         {
             var r = new RecordMesg();
             r.SetTimestamp(new Dynastream.Fit.DateTime(startDate));
+            r.SetDeviceIndex(2);
             r.SetCadence(averageCadence);
-            r.SetHeartRate(hr3);
-            r.SetAltitude(altitude);
-            r.SetDistance(distance);
+            r.SetHeartRate(hr);
+
+            var alt = altitude / 1000f;
+            r.SetAltitude(alt);
+            
+            var f = distance / 1f;
+            r.SetDistance(f);
             encoder.Write(r);
         }
 
@@ -126,11 +129,11 @@ namespace FitConverter.FitConvert
             // not too many combinations thus skipping dynamic programming
             while (true)
             {
-                for (hr1 = hr1Start; hr1 <= hr1End; hr1++)
+                for (hr1 = hr1End; hr1 >= hr1Start; hr1--)
                 {
-                    for (hr2 = hr2Start; hr2 <= hr2End; hr2++)
+                    for (hr2 = (byte)(hr2Start + 1); hr2 <= hr2End; hr2++)
                     {
-                        for (hr3 = hr3Start; hr3 <= hr3End; hr3++)
+                        for (hr3 = hr3End; hr3 > hr3Start; hr3--)
                         {
                             var currentAvg = (hr1*hr1Time + hr2*hr2Time + hr3*hr3Time)/totalTime;
 

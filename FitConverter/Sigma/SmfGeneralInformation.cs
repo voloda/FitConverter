@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Xml.Serialization;
 
 namespace FitConverter.Sigma
@@ -13,7 +14,13 @@ namespace FitConverter.Sigma
         {
             get
             {
-                return DateTime.Now.AddDays(-1); //Parse(StartDateAsString); 
+                var parts = StartDateAsString.Split(' ');
+
+                var value = String.Format("{0} {1} {2} {3}", parts[5], parts[1], parts[2], parts[3]);
+
+                var startDate = DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal).ToUniversalTime();
+
+                return startDate; 
             }
         }
 

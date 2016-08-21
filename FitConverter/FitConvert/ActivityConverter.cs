@@ -17,7 +17,7 @@ namespace FitConverter.FitConvert
             var a = new ActivityMesg();
 
             a.SetTimestamp(new DateTime(_dateTimeService.Now));
-            a.SetTotalTimerTime(source.GeneralInformation.TrainingTime);
+            a.SetTotalTimerTime(source.GeneralInformation.TrainingTime / 100);
             a.SetNumSessions(1);
 
             encoder.Write(a);
