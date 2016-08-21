@@ -11,7 +11,10 @@ namespace FitConverter.Sigma
         [XmlIgnore]
         public DateTime StartDate
         {
-            get { return DateTime.Parse(StartDateAsString); }
+            get
+            {
+                return DateTime.Now.AddDays(-1); //Parse(StartDateAsString); 
+            }
         }
 
         [XmlElement("name")]
@@ -27,10 +30,10 @@ namespace FitConverter.Sigma
         public int AltitudeDifferencesUphill { get; set; }
 
         [XmlElement("averageCadence")]
-        public int AverageCadence { get; set; }
+        public byte AverageCadence { get; set; }
 
         [XmlElement("averageHeartrate")]
-        public int AverageHR { get; set; }
+        public byte AverageHR { get; set; }
 
         [XmlElement("calories")]
         public int Calories { get; set; }
@@ -96,6 +99,7 @@ namespace FitConverter.Sigma
 
         [XmlElement("zone3End")]
         public byte HRZone3End { get; set; }
+
         #endregion
 
         [XmlElement("bike")]

@@ -8,6 +8,6 @@ namespace FitConverter.Sigma
         public string Unit { get; set; }
 
         [XmlAttribute("serial")]
-        public string Serial { get; set; }
+        public uint Serial { get; set; }
     }
 }

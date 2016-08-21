@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dynastream.Fit;
+using FitConverter.FitConvert;
+using FitConverter.Sigma;
 using DateTime = System.DateTime;
 
 namespace FitConverter
@@ -13,92 +15,30 @@ namespace FitConverter
     {
         static void Main(string[] args)
         {
-            FileStream fitDest = new FileStream("ExampleMonitoringFile.fit", FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-            var systemTimeNow = DateTime.Now;
+            var converters = new List<IConverter<SmfEntry>>()
+            {
+                new FileIdConverter(new DateTimeService()),
+                new DeviceInfoConverter(new DateTimeService()),
+                new ActivityConverter(new DateTimeService()),
+                new RecordConverter()
+            };
 
+            FileStream fitDest = new FileStream("ExampleMonitoringFile.fit", FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+            
             // Create file encode object
             Encode encodeDemo = new Encode(ProtocolVersion.V10);
 
             // Write our header
             encodeDemo.Open(fitDest);
 
-            // Generate some FIT messages
-            FileIdMesg fileIdMesg = new FileIdMesg(); // Every FIT file MUST contain a 'File ID' message as the first message
-            fileIdMesg.SetSerialNumber(54321);
-            fileIdMesg.SetTimeCreated(new Dynastream.Fit.DateTime(systemTimeNow));
-            fileIdMesg.SetManufacturer(Manufacturer.Sigmasport);
-            fileIdMesg.SetProduct(1001);
-            fileIdMesg.SetNumber(0);
-            fileIdMesg.SetType(Dynastream.Fit.File.Activity); // See the 'FIT FIle Types Description' document for more information about this file type.
-            encodeDemo.Write(fileIdMesg); // Write the 'File ID Message'
+            var source = new SmfReader().Read(args[0]);
+            var encoder = new FitEncoderAdapter(encodeDemo);
 
-            DeviceInfoMesg deviceInfoMesg = new DeviceInfoMesg();
-            deviceInfoMesg.SetTimestamp(new Dynastream.Fit.DateTime(systemTimeNow));
-            deviceInfoMesg.SetSerialNumber(54321);
-            deviceInfoMesg.SetManufacturer(Manufacturer.Sigmasport);
-            deviceInfoMesg.SetBatteryStatus(Dynastream.Fit.BatteryStatus.Good);
-            encodeDemo.Write(deviceInfoMesg);
+            foreach (var c in converters)
+            {
+                c.ProcessSection(source, encoder);
+            }
 
-            var a = new ActivityMesg();
-            a.SetTimestamp(new Dynastream.Fit.DateTime(systemTimeNow));
-            a.SetTotalTimerTime(25);
-            a.SetNumSessions(1);
-            encodeDemo.Write(a);
-
-            var r = new RecordMesg();
-            
-            r.SetTimestamp(new Dynastream.Fit.DateTime(systemTimeNow));
-
-
-            r.SetAltitude(0);
-            r.SetCadence(95);
-            r.SetDistance(0);
-            r.SetHeartRate(120);
-
-            encodeDemo.Write(r);
-
-            r = new RecordMesg();
-            r.SetTimestamp(new Dynastream.Fit.DateTime(systemTimeNow.AddSeconds(999)));
-
-            r.SetAltitude(235);
-            r.SetCadence(95);
-            r.SetDistance(1200f);
-            r.SetHeartRate(120);
-
-            encodeDemo.Write(r);
-
-            r = new RecordMesg();
-            r.SetTimestamp(new Dynastream.Fit.DateTime(systemTimeNow.AddSeconds(1000)));
-            
-            r.SetAltitude(235);
-            r.SetCadence(95);
-            r.SetDistance(1200f);
-            r.SetHeartRate(170);
-
-            encodeDemo.Write(r);
-
-            r = new RecordMesg();
-
-            r.SetTimestamp(new Dynastream.Fit.DateTime(systemTimeNow.AddSeconds(1999)));
-
-            r.SetAltitude(235);
-            r.SetCadence(95);
-            r.SetDistance(3600f);
-            r.SetHeartRate(170);
-
-            encodeDemo.Write(r);
-
-            r = new RecordMesg();
-
-            r.SetTimestamp(new Dynastream.Fit.DateTime(systemTimeNow.AddSeconds(2000)));
-            
-            r.SetAltitude(235);
-            r.SetCadence(95);
-            r.SetDistance(3600f);
-            r.SetHeartRate(120);
-            
-            encodeDemo.Write(r);
-            // Update header datasize and file CRC
             encodeDemo.Close();
             fitDest.Close();
 
