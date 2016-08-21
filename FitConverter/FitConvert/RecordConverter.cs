@@ -33,8 +33,26 @@ namespace FitConverter.FitConvert
             // up to 3 messages based on needs
 
             var averageCadence = smfGeneralInformation.AverageCadence;
-            var totalDistance = smfGeneralInformation.Distance;
+            int totalDistance = (int) smfGeneralInformation.Distance;
             var distance = 0;
+
+            if (!HasTimeInHRZone1(smfGeneralInformation) && !HasTimeInHRZone2(smfGeneralInformation) &&
+                !HasTimeInHRZone3(smfGeneralInformation))
+            {
+                totalTime = smfGeneralInformation.TrainingTime;
+                var timeInZone = totalTime;
+
+                startDate = startDate.AddSeconds(.5);
+
+                WriteEntry(encoder, startDate, averageCadence, smfGeneralInformation.AverageHR, altitude, distance);
+
+                startDate = startDate.AddSeconds(timeInZone);
+                
+                altitude += smfGeneralInformation.AltitudeDifferencesUphill;
+                distance += totalDistance;
+
+                WriteEntry(encoder, startDate, averageCadence, smfGeneralInformation.AverageHR, altitude, distance);
+            }
 
             if (HasTimeInHRZone1(smfGeneralInformation))
             {
@@ -125,6 +143,9 @@ namespace FitConverter.FitConvert
 
             var variance = 0;
             var totalTime = hr1Time + hr2Time + hr3Time;
+
+            hr1 = hr2 = hr3 = 0;
+            if (totalTime == 0) return;
 
             // not too many combinations thus skipping dynamic programming
             while (true)

@@ -86,9 +86,9 @@ namespace FitConveter.Tests.Sigma
             {
                 var entry = reader.Read(data);
 
-                Assert.That(entry.Computer.Serial, Is.EqualTo(90126995));
+                Assert.That(entry.Computer.Serial, Is.EqualTo("90126995"));
                 Assert.That(entry.GeneralInformation.Bike, Is.EqualTo("bike1"));
-                Assert.That(entry.GeneralInformation.StartDate, Is.EqualTo(new DateTime(2016, 7, 9, 10, 1, 0)));
+                Assert.That(entry.GeneralInformation.StartDate, Is.EqualTo(new DateTime(2016, 7, 9, 8, 1, 0)));
 
                 Assert.That(entry.GeneralInformation.Guid, Is.EqualTo(new Guid("D16C0F9A-BE77-083A-0F61-12A125FF5F0E")));
 

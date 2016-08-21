@@ -46,13 +46,13 @@ namespace FitConverter.Sigma
         public int Calories { get; set; }
 
         [XmlElement("distance")]
-        public int Distance { get; set; }
+        public float Distance { get; set; }
 
         [XmlElement("distanceDownhill")]
-        public int DistanceDownhill { get; set; }
+        public float DistanceDownhill { get; set; }
 
         [XmlElement("distanceUphill")]
-        public int DistanceUphill { get; set; }
+        public float DistanceUphill { get; set; }
 
         [XmlElement("maximumAltitude")]
         public int MaximumAltitude { get; set; }

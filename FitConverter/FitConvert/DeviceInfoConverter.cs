@@ -17,7 +17,9 @@ namespace FitConverter.FitConvert
             DeviceInfoMesg deviceInfoMesg = new DeviceInfoMesg();
 
             deviceInfoMesg.SetTimestamp(new DateTime(_dateTimeService.Now));
-            deviceInfoMesg.SetSerialNumber(source.Computer.Serial);
+
+            if (!string.IsNullOrEmpty(source.Computer.Serial)) deviceInfoMesg.SetSerialNumber(uint.Parse(source.Computer.Serial));
+
             deviceInfoMesg.SetManufacturer(Manufacturer.Sigmasport);
             deviceInfoMesg.SetBatteryStatus(Dynastream.Fit.BatteryStatus.Good);
 

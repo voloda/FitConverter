@@ -39,18 +39,29 @@ namespace FitConverter
 
             if (pos != -1)
             {
-                path = mask.Substring(0, pos - 1);
+                path = mask.Substring(0, pos);
                 mask = mask.Substring(pos + 1);
             }
 
             var files = Directory.GetFiles(path, mask, SearchOption.TopDirectoryOnly);
+            var subfolderIndex = 0;
 
             foreach (var fileName in files)
             {
-                var destinationFileName = Path.ChangeExtension(fileName, "fit");
+                
+                var fileInfo = new FileInfo(fileName);
+                var destinationDirectory = Path.Combine(fileInfo.DirectoryName, (subfolderIndex / 20).ToString());
+                var di = new DirectoryInfo(destinationDirectory);
+                if (!di.Exists) di.Create();
 
-                Console.WriteLine("Processing file {0}", fileName);
+                var destinationFileName = Path.Combine(destinationDirectory, fileInfo.Name);
+
+                destinationFileName = Path.ChangeExtension(destinationFileName, "fit");
+
+                Console.WriteLine("Processing file {0}", destinationFileName);
                 ProcessFile(fileName, destinationFileName);
+
+                subfolderIndex++;
             }
         }
 
