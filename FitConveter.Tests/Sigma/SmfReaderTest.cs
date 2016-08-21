@@ -87,7 +87,7 @@ namespace FitConveter.Tests.Sigma
                 var entry = reader.Read(data);
 
                 Assert.That(entry.Computer.Serial, Is.EqualTo("90126995"));
-
+                Assert.That(entry.GeneralInformation.Bike, Is.EqualTo("bike1"));
                 // Assert.That(entry.GeneralInformation.StartDate, Is.EqualTo(new DateTime(2016, 7, 9, 10, 1, 0)));
 
                 Assert.That(entry.GeneralInformation.Guid, Is.EqualTo(new Guid("D16C0F9A-BE77-083A-0F61-12A125FF5F0E")));
@@ -97,12 +97,12 @@ namespace FitConveter.Tests.Sigma
                 Assert.That(entry.GeneralInformation.AverageCadence, Is.EqualTo(94));
                 Assert.That(entry.GeneralInformation.AverageHR, Is.EqualTo(152));
 
+                Assert.That(entry.GeneralInformation.TrainingTime, Is.EqualTo(1350300));
+
                 Assert.That(entry.GeneralInformation.TimeUnderHRTargetZone, Is.EqualTo(1));
                 Assert.That(entry.GeneralInformation.TimeInHRZone1, Is.EqualTo(70400));
-                
                 Assert.That(entry.GeneralInformation.TimeInHRZone2, Is.EqualTo(523800));
                 Assert.That(entry.GeneralInformation.TimeInHRZone3, Is.EqualTo(736600));
-                Assert.That(entry.GeneralInformation.TrainingTime, Is.EqualTo(1350300));
                 Assert.That(entry.GeneralInformation.TimeOverHRTargetZone, Is.EqualTo(2));
 
                 Assert.That(entry.GeneralInformation.HRZone1Start, Is.EqualTo(103));

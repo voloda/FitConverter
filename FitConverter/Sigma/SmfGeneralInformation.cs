@@ -98,5 +98,7 @@ namespace FitConverter.Sigma
         public byte HRZone3End { get; set; }
         #endregion
 
+        [XmlElement("bike")]
+        public string Bike { get; set; }
     }
 }
