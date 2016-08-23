@@ -21,6 +21,8 @@ namespace FitConverter.FitConvert
             if (!string.IsNullOrEmpty(source.Computer.Serial)) deviceInfoMesg.SetSerialNumber(uint.Parse(source.Computer.Serial));
 
             deviceInfoMesg.SetManufacturer(Manufacturer.Sigmasport);
+            deviceInfoMesg.SetProduct(901);
+            deviceInfoMesg.SetProductName("ROX 9.0 A");
             deviceInfoMesg.SetBatteryStatus(Dynastream.Fit.BatteryStatus.Good);
 
             encoder.Write(deviceInfoMesg);

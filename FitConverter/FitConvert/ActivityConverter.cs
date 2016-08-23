@@ -19,7 +19,6 @@ namespace FitConverter.FitConvert
             a.SetTimestamp(new DateTime(_dateTimeService.Now));
             a.SetTotalTimerTime(source.GeneralInformation.TrainingTime / 100);
             a.SetNumSessions(1);
-
             encoder.Write(a);
         }
     }

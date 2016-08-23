@@ -43,7 +43,7 @@ namespace FitConverter
                 mask = mask.Substring(pos + 1);
             }
 
-            var files = Directory.GetFiles(path, mask, SearchOption.TopDirectoryOnly);
+            var files = Directory.GetFiles(path, mask, SearchOption.TopDirectoryOnly).OrderBy(v => v);
             var subfolderIndex = 0;
 
             foreach (var fileName in files)

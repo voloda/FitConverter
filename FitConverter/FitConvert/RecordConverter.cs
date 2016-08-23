@@ -22,7 +22,7 @@ namespace FitConverter.FitConvert
             var totalTime = (smfGeneralInformation.TimeInHRZone1 + smfGeneralInformation.TimeInHRZone2 +
                             smfGeneralInformation.TimeInHRZone3) / 100;
 
-            var altitude = smfGeneralInformation.MaximumAltitude * 10 - smfGeneralInformation.AltitudeDifferencesUphill;
+            var altitude = smfGeneralInformation.MaximumAltitude - smfGeneralInformation.AltitudeDifferencesUphill;
             
             byte hr1;
             byte hr2;
@@ -42,7 +42,7 @@ namespace FitConverter.FitConvert
                 totalTime = smfGeneralInformation.TrainingTime;
                 var timeInZone = totalTime;
 
-                startDate = startDate.AddSeconds(.5);
+                startDate = startDate.AddSeconds(1);
 
                 WriteEntry(encoder, startDate, averageCadence, smfGeneralInformation.AverageHR, altitude, distance);
 
@@ -58,7 +58,7 @@ namespace FitConverter.FitConvert
             {
                 var timeInZone = smfGeneralInformation.TimeInHRZone1 / 100;
 
-                startDate = startDate.AddSeconds(.5);
+                startDate = startDate.AddSeconds(1);
 
                 WriteEntry(encoder, startDate, averageCadence, hr1, altitude, distance);
 
@@ -74,7 +74,7 @@ namespace FitConverter.FitConvert
             {
                 var timeInZone = smfGeneralInformation.TimeInHRZone2 / 100;
                 
-                startDate = startDate.AddSeconds(.5);
+                startDate = startDate.AddSeconds(1);
 
                 WriteEntry(encoder, startDate, averageCadence, hr2, altitude, distance);
 
@@ -90,7 +90,7 @@ namespace FitConverter.FitConvert
             {
                 var timeInZone = smfGeneralInformation.TimeInHRZone3 / 100;
                 
-                startDate = startDate.AddSeconds(.5);
+                startDate = startDate.AddSeconds(1);
 
                 WriteEntry(encoder, startDate, averageCadence, hr3, altitude, distance);
 
