@@ -97,6 +97,8 @@ namespace FitConveter.Tests.Sigma
                 Assert.That(entry.GeneralInformation.AverageCadence, Is.EqualTo(94));
                 Assert.That(entry.GeneralInformation.AverageHR, Is.EqualTo(152));
 
+                Assert.That(entry.GeneralInformation.MaximumHR, Is.EqualTo(174));
+
                 Assert.That(entry.GeneralInformation.TrainingTime, Is.EqualTo(1350300));
 
                 Assert.That(entry.GeneralInformation.TimeUnderHRTargetZone, Is.EqualTo(1));

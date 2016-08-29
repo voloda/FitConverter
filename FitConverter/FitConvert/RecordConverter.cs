@@ -36,22 +36,25 @@ namespace FitConverter.FitConvert
             int totalDistance = (int) smfGeneralInformation.Distance;
             var distance = 0;
 
+            sbyte minTemperature = (sbyte) smfGeneralInformation.MinimumTemperature;
+            sbyte maxTemperature = (sbyte) smfGeneralInformation.MaximumTemperature;
+
             if (!HasTimeInHRZone1(smfGeneralInformation) && !HasTimeInHRZone2(smfGeneralInformation) &&
                 !HasTimeInHRZone3(smfGeneralInformation))
             {
                 totalTime = smfGeneralInformation.TrainingTime;
-                var timeInZone = totalTime;
+                var timeInZone = totalTime / 100;
 
                 startDate = startDate.AddSeconds(1);
 
-                WriteEntry(encoder, startDate, averageCadence, smfGeneralInformation.AverageHR, altitude, distance);
+                WriteEntry(encoder, startDate, averageCadence, smfGeneralInformation.AverageHR, altitude, distance, minTemperature);
 
                 startDate = startDate.AddSeconds(timeInZone);
                 
                 altitude += smfGeneralInformation.AltitudeDifferencesUphill;
                 distance += totalDistance;
 
-                WriteEntry(encoder, startDate, averageCadence, smfGeneralInformation.AverageHR, altitude, distance);
+                WriteEntry(encoder, startDate, averageCadence, smfGeneralInformation.AverageHR, altitude, distance, maxTemperature);
             }
 
             if (HasTimeInHRZone1(smfGeneralInformation))
@@ -60,14 +63,14 @@ namespace FitConverter.FitConvert
 
                 startDate = startDate.AddSeconds(1);
 
-                WriteEntry(encoder, startDate, averageCadence, hr1, altitude, distance);
+                WriteEntry(encoder, startDate, averageCadence, hr1, altitude, distance, minTemperature);
 
                 startDate = startDate.AddSeconds(timeInZone);
                 altitude += smfGeneralInformation.AltitudeDifferencesUphill * timeInZone /
                             totalTime;
                 distance += totalDistance * timeInZone / totalTime;
 
-                WriteEntry(encoder, startDate, averageCadence, hr1, altitude, distance);
+                WriteEntry(encoder, startDate, averageCadence, hr1, altitude, distance, maxTemperature);
             }
 
             if (HasTimeInHRZone2(smfGeneralInformation))
@@ -76,14 +79,14 @@ namespace FitConverter.FitConvert
                 
                 startDate = startDate.AddSeconds(1);
 
-                WriteEntry(encoder, startDate, averageCadence, hr2, altitude, distance);
+                WriteEntry(encoder, startDate, averageCadence, hr2, altitude, distance, minTemperature);
 
                 startDate = startDate.AddSeconds(timeInZone);
                 altitude += smfGeneralInformation.AltitudeDifferencesUphill * timeInZone /
                             totalTime;
                 distance += totalDistance * timeInZone / totalTime;
 
-                WriteEntry(encoder, startDate, averageCadence, hr2, altitude, distance);
+                WriteEntry(encoder, startDate, averageCadence, hr2, altitude, distance, maxTemperature);
             }
 
             if (HasTimeInHRZone3(smfGeneralInformation))
@@ -92,26 +95,27 @@ namespace FitConverter.FitConvert
                 
                 startDate = startDate.AddSeconds(1);
 
-                WriteEntry(encoder, startDate, averageCadence, hr3, altitude, distance);
+                WriteEntry(encoder, startDate, averageCadence, hr3, altitude, distance, minTemperature);
 
                 startDate = startDate.AddSeconds(timeInZone);
                 altitude += smfGeneralInformation.AltitudeDifferencesUphill * timeInZone /
                             totalTime;
                 distance += totalDistance * timeInZone / totalTime;
 
-                WriteEntry(encoder, startDate, averageCadence, hr3, altitude, distance);
+                WriteEntry(encoder, startDate, averageCadence, hr3, altitude, distance, maxTemperature);
             }
 
         }
 
         private static void WriteEntry(IFitEncoderAdapter encoder, DateTime startDate, byte averageCadence, byte hr,
-            int altitude, int distance)
+            int altitude, int distance, sbyte temperature)
         {
             var r = new RecordMesg();
             r.SetTimestamp(new Dynastream.Fit.DateTime(startDate));
             r.SetDeviceIndex(2);
             r.SetCadence(averageCadence);
             r.SetHeartRate(hr);
+            r.SetTemperature(temperature);
 
             var alt = altitude / 1000f;
             r.SetAltitude(alt);
@@ -128,17 +132,19 @@ namespace FitConverter.FitConvert
 
         public static void CalculateHR(out byte hr1, out byte hr2, out byte hr3, SmfGeneralInformation info)
         {
-            var hr1Start = info.HRZone1Start;
-            var hr1End = info.HRZone2Start;
+            var maxHR = info.MaximumHR;
+
+            var hr1Start = Math.Min(maxHR, info.HRZone1Start);
+            var hr1End = Math.Min(maxHR, info.HRZone2Start);
             var hr1Time = info.TimeInHRZone1;
 
             var hr2Start = hr1End;
-            var hr2End = info.HRZone3Start;
+            var hr2End = Math.Min(maxHR, info.HRZone3Start);
             var hr2Time = info.TimeInHRZone2;
 
 
             var hr3Start = hr2End;
-            var hr3End = info.HRZone3End;
+            var hr3End = Math.Min(maxHR, info.HRZone3End);
             var hr3Time = info.TimeInHRZone3;
 
             var variance = 0;
@@ -147,14 +153,27 @@ namespace FitConverter.FitConvert
             hr1 = hr2 = hr3 = 0;
             if (totalTime == 0) return;
 
+            if (hr1Start <= maxHR && maxHR <= hr1End)
+            {
+                hr1Start = hr1End = maxHR;
+            }
+            else if (hr2Start <= maxHR && maxHR <= hr2End)
+            {
+                hr2Start = hr2End = maxHR;
+            }
+            else if (hr3Start <= maxHR && maxHR <= hr3End)
+            {
+                hr3Start = hr3End = maxHR;
+            }
+
             // not too many combinations thus skipping dynamic programming
             while (true)
             {
                 for (hr1 = hr1End; hr1 >= hr1Start; hr1--)
                 {
-                    for (hr2 = (byte)(hr2Start + 1); hr2 <= hr2End; hr2++)
+                    for (hr2 = hr2End; hr2 >= hr2Start; hr2--)
                     {
-                        for (hr3 = hr3End; hr3 > hr3Start; hr3--)
+                        for (hr3 = hr3End; hr3 >= hr3Start; hr3--)
                         {
                             var currentAvg = (hr1*hr1Time + hr2*hr2Time + hr3*hr3Time)/totalTime;
 

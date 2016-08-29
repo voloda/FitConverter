@@ -42,6 +42,9 @@ namespace FitConverter.Sigma
         [XmlElement("averageHeartrate")]
         public byte AverageHR { get; set; }
 
+        [XmlElement("maximumHeartrate")]
+        public byte MaximumHR { get; set; }
+
         [XmlElement("calories")]
         public int Calories { get; set; }
 
@@ -59,7 +62,6 @@ namespace FitConverter.Sigma
 
         [XmlElement("maximumCadence")]
         public byte MaximumCadence { get; set; }
-        
 
         [XmlElement("maximumTemperature")]
         public float MaximumTemperature { get; set; }
